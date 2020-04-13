@@ -4,6 +4,7 @@ description = "A Rust binding for rclone-crypt to allow for file operations on e
 version = "0.1.0"
 authors = ["Tyler Blair <tyler@viru.ca>"]
 edition = "2018"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0.27"
