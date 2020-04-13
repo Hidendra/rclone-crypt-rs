@@ -1,10 +1,11 @@
 [package]
 name = "rclone-crypt"
 description = "A Rust binding for rclone-crypt to allow for file operations on encrypted files"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Tyler Blair <tyler@viru.ca>"]
 edition = "2018"
 license = "MIT"
+repository = "https://github.com/Hidendra/rclone-crypt-rs"
 
 [dependencies]
 anyhow = "1.0.27"
