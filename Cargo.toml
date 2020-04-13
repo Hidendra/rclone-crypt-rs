@@ -1,0 +1,19 @@
+[package]
+name = "rclone-crypt"
+description = "A Rust binding for rclone-crypt to allow for file operations on encrypted files"
+version = "0.1.0"
+authors = ["Tyler Blair <tyler@viru.ca>"]
+edition = "2018"
+
+[dependencies]
+anyhow = "1.0.27"
+sodiumoxide = "0.2.5"
+base64 = "0.12.0"
+base32 = "0.4.0"
+aes-ctr = "0.3.0"
+scrypt = "0.2.0"
+arrayref = "0.3.6"
+openssl = "0.10.29"
+data-encoding = "2.2.0"
+aes-soft = "0.3.3"
+block-modes = "0.3.3"
