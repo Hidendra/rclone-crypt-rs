@@ -160,7 +160,7 @@ impl Cipher {
         Ok(PathBuf::from(result))
     }
 
-    pub fn encrypt_file_name(&self, name: &String) -> Result<String> {
+    pub fn encrypt_file_name(&self, name: &str) -> Result<String> {
         let segments = name
             .split("/")
             .map(|seg| self.encrypt_segment(&seg))
@@ -169,7 +169,7 @@ impl Cipher {
         Ok(segments.join("/"))
     }
 
-    pub fn decrypt_file_name(&self, name: &String) -> Result<String> {
+    pub fn decrypt_file_name(&self, name: &str) -> Result<String> {
         let segments = name
             .split("/")
             .map(|seg| self.decrypt_segment(&seg))
