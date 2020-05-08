@@ -1,7 +1,7 @@
 [package]
 name = "rclone-crypt"
 description = "A Rust binding for rclone-crypt to allow for file operations on encrypted files"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Tyler Blair <tyler@viru.ca>"]
 edition = "2018"
 license = "MIT"
