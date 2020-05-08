@@ -28,7 +28,7 @@ fn crypt(data: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
     Ok(data)
 }
 
-pub fn reveal(text: &String) -> Result<String> {
+pub fn reveal(text: &str) -> Result<String> {
     // text is basically: base64(iv + ciphertext)
     let ciphertext = base64::decode_config(&text, base64::URL_SAFE_NO_PAD)?;
 
@@ -48,7 +48,7 @@ pub fn reveal(text: &String) -> Result<String> {
     Ok(result)
 }
 
-pub fn obscure(plaintext: &String) -> Result<String> {
+pub fn obscure(plaintext: &str) -> Result<String> {
     let plaintext = plaintext.as_bytes();
     let iv = randombytes(OBSCURE_BLOCK_SIZE);
     let ciphertext = crypt(plaintext, &iv)?;
