@@ -86,7 +86,7 @@ impl Cipher {
         })
     }
 
-    fn encrypt_segment(&self, segment: &str) -> Result<String> {
+    pub fn encrypt_segment(&self, segment: &str) -> Result<String> {
         if segment.len() == 0 {
             return Ok(String::new());
         }
@@ -110,7 +110,7 @@ impl Cipher {
         Ok(encoded)
     }
 
-    fn decrypt_segment(&self, segment: &str) -> Result<String> {
+    pub fn decrypt_segment(&self, segment: &str) -> Result<String> {
         let decoded = decode_segment(segment)?;
 
         if decoded.is_empty() || decoded.len() % NAME_CIPHER_BLOCK_SIZE != 0 {
