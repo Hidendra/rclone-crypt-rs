@@ -7,7 +7,7 @@ use crate::eme::{AesEme, NAME_CIPHER_BLOCK_SIZE};
 use arrayref::array_ref;
 use block_modes::block_padding::{Padding, Pkcs7};
 use data_encoding::{BASE32HEX, BASE32HEX_NOPAD};
-use scrypt::{scrypt, ScryptParams};
+use scrypt::{scrypt, Params};
 use std::path::{Component, PathBuf};
 
 const TOTAL_KEY_SIZE: usize = 32 + 32 + eme::NAME_CIPHER_BLOCK_SIZE; // this should probably be defined more nicely
@@ -47,7 +47,7 @@ pub struct Cipher {
 /// Calculates the keys using scrypt.
 /// This key is used together with file nonce to encrypt/decrypt file and name data.
 fn generate_keys(password: &str, salt: &str) -> Result<(FileKey, NameKey, TweakKey)> {
-    let params = ScryptParams::new(14, 8, 1)?; // log2(16384) = 14
+    let params = Params::new(14, 8, 1)?; // log2(16384) = 14
 
     let mut key = [0u8; TOTAL_KEY_SIZE];
     scrypt(password.as_bytes(), salt.as_bytes(), &params, &mut key)?;
