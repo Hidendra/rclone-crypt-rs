@@ -2,7 +2,7 @@
 /// Adapted from the Golang version: https://github.com/rfjakob/eme
 use anyhow::{anyhow, Context, Result};
 
-extern crate aes_soft as aes;
+extern crate aes;
 use aes::Aes256;
 use block_modes::block_padding::NoPadding;
 use block_modes::{BlockMode, Ecb};
@@ -62,7 +62,7 @@ impl AesEme {
         // set L0 = 2*AESenc(K; 0)
         let mut li = [0u8; 16];
 
-        let cipher = Aes256Ecb::new_var(&self.key, Default::default())?;
+        let cipher = Aes256Ecb::new_from_slices(&self.key, Default::default())?;
         let length = li.len();
         cipher.encrypt(&mut li, length)?;
 
@@ -82,7 +82,7 @@ impl AesEme {
     fn aes_transform(&self, data: &[u8], direction: &TransformDirection) -> Result<Vec<u8>> {
         let mut data = data.to_vec();
 
-        let cipher = Aes256Ecb::new_var(&self.key, Default::default())?;
+        let cipher = Aes256Ecb::new_from_slices(&self.key, Default::default())?;
         let length = data.len();
 
         match direction {
@@ -215,7 +215,7 @@ mod tests {
     use data_encoding::HEXLOWER;
 
     #[test]
-    fn eme__should_encrypt_16_bytes__encryptes_successfully() -> Result<()> {
+    fn eme_should_encrypt_16_bytes_encrypts_successfully() -> Result<()> {
         let key = [0u8; 32];
         let tweak = [0u8; 16];
         let plaintext = [0u8; 16];
