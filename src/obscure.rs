@@ -2,9 +2,9 @@
 /// AKA base64(aes-ctr(val, static_key)) :-(
 use anyhow::{anyhow, Result};
 
-use aes_ctr::stream_cipher::generic_array::GenericArray;
-use aes_ctr::stream_cipher::{NewStreamCipher, SyncStreamCipher};
-use aes_ctr::Aes256Ctr;
+use cipher::generic_array::GenericArray;
+use cipher::{NewCipher, StreamCipher};
+use aes::Aes256Ctr;
 use sodiumoxide::randombytes::randombytes;
 
 // the static key used for obscuring
