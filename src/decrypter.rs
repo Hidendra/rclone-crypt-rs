@@ -1,8 +1,7 @@
-use crate::{cipher::FileKey, constants::{FILE_MAGIC, FILE_NONCE_SIZE}};
+use crate::{calculate_nonce, cipher::FileKey, FILE_MAGIC};
 use anyhow::{anyhow, Result};
 use arrayref::array_ref;
 use sodiumoxide::crypto::secretbox;
-
 
 /// Decrypter instance for a single file.
 /// This is not a managed reader; it must be assisted with a separate reader that passes
@@ -10,11 +9,11 @@ use sodiumoxide::crypto::secretbox;
 pub struct Decrypter {
     key: secretbox::Key,
     initial_nonce: secretbox::Nonce,
-    // nonce: secretbox::Nonce,
 }
 
 impl Decrypter {
     pub fn new(file_key: &FileKey, file_header: &[u8]) -> Result<Self> {
+        sodiumoxide::init().map_err(|_| anyhow!("Could not initialize sodiumoxide"))?;
         if &file_header[..FILE_MAGIC.len()] != FILE_MAGIC {
             return Err(anyhow!("Invalid file magic in file"));
         }
@@ -23,43 +22,12 @@ impl Decrypter {
 
         Ok(Decrypter {
             key: secretbox::Key(*file_key),
-            // nonce: nonce,
             initial_nonce: nonce,
         })
     }
 
     fn calculate_nonce(&self, block_id: u64) -> secretbox::Nonce {
-        let mut nonce = secretbox::Nonce(self.initial_nonce.0);
-
-        if block_id == 0 {
-            return nonce;
-        }
-
-        let mut x = block_id;
-        let mut carry: u16 = 0;
-
-        for i in 0..8 {
-            let digit = nonce.0[i];
-            let x_digit = x as u8;
-            x >>= 8;
-            carry += digit as u16 + x_digit as u16;
-            nonce.0[i] = carry as u8;
-            carry >>= 8;
-        }
-
-        if carry != 0 {
-            for i in carry as usize..FILE_NONCE_SIZE {
-                let digit = nonce.0[i];
-                let new_digit = digit + 1;
-                nonce.0[i] = new_digit;
-                if new_digit >= digit {
-                    // no carry
-                    break;
-                }
-            }
-        }
-
-        nonce
+        calculate_nonce(self.initial_nonce, block_id)
     }
 
     /// Decrypts a block using the nonce and password state
@@ -68,9 +36,7 @@ impl Decrypter {
     pub fn decrypt_block(&self, block_id: u64, block: &[u8]) -> Result<Vec<u8>> {
         let nonce = self.calculate_nonce(block_id);
 
-        match secretbox::open(block, &nonce, &self.key) {
-            Ok(decrypted) => Ok(decrypted),
-            Err(_) => Err(anyhow!("Failed to decrypt block of size {}", block.len())),
-        }
+        secretbox::open(block, &nonce, &self.key)
+            .map_err(|_| anyhow!("Failed to decrypt block of size {}", block.len()))
     }
 }
