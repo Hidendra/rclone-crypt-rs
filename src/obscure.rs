@@ -20,7 +20,7 @@ fn crypt(data: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
     let key = GenericArray::from_slice(&OBSCURE_CRYPT_KEY);
     let nonce = GenericArray::from_slice(iv);
 
-    let mut cipher = Aes256Ctr::new(&key, &nonce);
+    let mut cipher = Aes256Ctr::new(key, nonce);
     let mut data = data.to_vec();
 
     cipher.apply_keystream(&mut data);
@@ -43,7 +43,7 @@ pub fn reveal(text: &str) -> Result<String> {
     let buf = &ciphertext[OBSCURE_BLOCK_SIZE..];
     let iv = &ciphertext[0..OBSCURE_BLOCK_SIZE];
 
-    let plaintext = crypt(&buf, &iv)?;
+    let plaintext = crypt(buf, iv)?;
     let result = String::from_utf8(plaintext)?;
     Ok(result)
 }
