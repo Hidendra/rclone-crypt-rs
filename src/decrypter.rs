@@ -1,16 +1,8 @@
-use crate::cipher::FileKey;
+use crate::{cipher::FileKey, constants::{FILE_MAGIC, FILE_NONCE_SIZE}};
 use anyhow::{anyhow, Result};
 use arrayref::array_ref;
 use sodiumoxide::crypto::secretbox;
 
-pub const FILE_MAGIC: &[u8] = b"RCLONE\x00\x00";
-pub const FILE_NONCE_SIZE: usize = 24;
-pub const FILE_HEADER_SIZE: usize = FILE_MAGIC.len() + FILE_NONCE_SIZE;
-
-// Each block has an authenticated header
-pub const BLOCK_HEADER_SIZE: usize = secretbox::MACBYTES;
-pub const BLOCK_DATA_SIZE: usize = 64 * 1024;
-pub const BLOCK_SIZE: usize = BLOCK_HEADER_SIZE + BLOCK_DATA_SIZE;
 
 /// Decrypter instance for a single file.
 /// This is not a managed reader; it must be assisted with a separate reader that passes
@@ -27,17 +19,17 @@ impl Decrypter {
             return Err(anyhow!("Invalid file magic in file"));
         }
 
-        let nonce = secretbox::Nonce(array_ref!(file_header, FILE_MAGIC.len(), 24).clone());
+        let nonce = secretbox::Nonce(*array_ref!(file_header, FILE_MAGIC.len(), 24));
 
         Ok(Decrypter {
-            key: secretbox::Key(file_key.clone()),
+            key: secretbox::Key(*file_key),
             // nonce: nonce,
             initial_nonce: nonce,
         })
     }
 
     fn calculate_nonce(&self, block_id: u64) -> secretbox::Nonce {
-        let mut nonce = secretbox::Nonce(self.initial_nonce.0.clone());
+        let mut nonce = secretbox::Nonce(self.initial_nonce.0);
 
         if block_id == 0 {
             return nonce;
@@ -76,7 +68,7 @@ impl Decrypter {
     pub fn decrypt_block(&self, block_id: u64, block: &[u8]) -> Result<Vec<u8>> {
         let nonce = self.calculate_nonce(block_id);
 
-        match secretbox::open(&block, &nonce, &self.key) {
+        match secretbox::open(block, &nonce, &self.key) {
             Ok(decrypted) => Ok(decrypted),
             Err(_) => Err(anyhow!("Failed to decrypt block of size {}", block.len())),
         }

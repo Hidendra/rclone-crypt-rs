@@ -94,12 +94,12 @@ impl AesEme {
     }
 
     pub fn decrypt(&self, tweak: &[u8; NAME_CIPHER_BLOCK_SIZE], data: &[u8]) -> Result<Vec<u8>> {
-        let result = self.transform(&tweak, &data, TransformDirection::Decrypt)?;
+        let result = self.transform(tweak, data, TransformDirection::Decrypt)?;
         Ok(result)
     }
 
     pub fn encrypt(&self, tweak: &[u8; NAME_CIPHER_BLOCK_SIZE], data: &[u8]) -> Result<Vec<u8>> {
-        let result = self.transform(&tweak, &data, TransformDirection::Encrypt)?;
+        let result = self.transform(tweak, data, TransformDirection::Encrypt)?;
         Ok(result)
     }
 
@@ -160,7 +160,7 @@ impl AesEme {
         // xorBlocks(mp, c[0:16], t)
         xor_blocks(&mut mp, &c[0..16], t);
         for i in 1..num_blocks {
-            let in1 = mp.clone();
+            let in1 = mp;
             xor_blocks(&mut mp, &in1, &c[i * 16..(i + 1) * 16]);
         }
 
@@ -168,7 +168,7 @@ impl AesEme {
         // aes_transform(mc, mp, direction, bc)
         let mc = self
             .aes_transform(&mp, &direction)
-            .with_context(|| format!("test2"))?;
+            .with_context(|| "test2".to_string())?;
 
         // m = mp xor mc
         let mut m = [0u8; 16];
@@ -185,7 +185,7 @@ impl AesEme {
         let mut ccc1 = [0u8; 16];
         xor_blocks(&mut ccc1, &mc, t);
         for i in 1..num_blocks {
-            let in1 = ccc1.clone();
+            let in1 = ccc1;
             xor_blocks(&mut ccc1, &in1, &c[i * 16..(i + 1) * 16]);
         }
         c[0..16].copy_from_slice(&ccc1);
@@ -196,7 +196,7 @@ impl AesEme {
             // aes_transform(c[j*16:(j+1)*16], c[j*16:(j+1)*16], direction, bc)
             let result = self
                 .aes_transform(block, &direction)
-                .with_context(|| format!("test3"))?;
+                .with_context(|| "test3".to_string())?;
             block.copy_from_slice(&result);
             // Cj = 2**(j-1)*L xor CCj
             // xorBlocks(c[j*16:(j+1)*16], c[j*16:(j+1)*16], ltable[j])

@@ -8,7 +8,7 @@ use arrayref::array_ref;
 use block_modes::block_padding::{Padding, Pkcs7};
 use data_encoding::{BASE32HEX, BASE32HEX_NOPAD};
 use scrypt::{scrypt, Params};
-use std::path::{Component, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 const TOTAL_KEY_SIZE: usize = 32 + 32 + eme::NAME_CIPHER_BLOCK_SIZE; // this should probably be defined more nicely
 
@@ -53,9 +53,9 @@ fn generate_keys(password: &str, salt: &str) -> Result<(FileKey, NameKey, TweakK
     scrypt(password.as_bytes(), salt.as_bytes(), &params, &mut key)?;
 
     Ok((
-        array_ref!(key, 0, 32).clone(),
-        array_ref!(key, 32, 32).clone(),
-        array_ref!(key, 64, eme::NAME_CIPHER_BLOCK_SIZE).clone(),
+        *array_ref!(key, 0, 32),
+        *array_ref!(key, 32, 32),
+        *array_ref!(key, 64, eme::NAME_CIPHER_BLOCK_SIZE),
     ))
 }
 
@@ -87,7 +87,7 @@ impl Cipher {
     }
 
     pub fn encrypt_segment(&self, segment: &str) -> Result<String> {
-        if segment.len() == 0 {
+        if segment.is_empty() {
             return Ok(String::new());
         }
 
@@ -134,7 +134,7 @@ impl Cipher {
         Ok(plaintext)
     }
 
-    pub fn encrypt_path(&self, path: &PathBuf) -> Result<PathBuf> {
+    pub fn encrypt_path(&self, path: &Path) -> Result<PathBuf> {
         let mut result = PathBuf::new();
 
         for component in path.components() {
@@ -144,10 +144,10 @@ impl Cipher {
             }
         }
 
-        Ok(PathBuf::from(result))
+        Ok(result)
     }
 
-    pub fn decrypt_path(&self, path: &PathBuf) -> Result<PathBuf> {
+    pub fn decrypt_path(&self, path: &Path) -> Result<PathBuf> {
         let mut result = PathBuf::new();
 
         for component in path.components() {
@@ -157,13 +157,13 @@ impl Cipher {
             }
         }
 
-        Ok(PathBuf::from(result))
+        Ok(result)
     }
 
     pub fn encrypt_file_name(&self, name: &str) -> Result<String> {
         let segments = name
-            .split("/")
-            .map(|seg| self.encrypt_segment(&seg))
+            .split('/')
+            .map(|seg| self.encrypt_segment(seg))
             .collect::<Result<Vec<String>>>()?;
 
         Ok(segments.join("/"))
@@ -171,8 +171,8 @@ impl Cipher {
 
     pub fn decrypt_file_name(&self, name: &str) -> Result<String> {
         let segments = name
-            .split("/")
-            .map(|seg| self.decrypt_segment(&seg))
+            .split('/')
+            .map(|seg| self.decrypt_segment(seg))
             .collect::<Result<Vec<String>>>()?;
 
         Ok(segments.join("/"))
