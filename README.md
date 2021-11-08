@@ -2,7 +2,7 @@
 
 A lightweight Rust implementation of the Rclone Crypt file encryption.
 
-VERY EXPERIMENTAL! This currently only supports decryption.
+VERY EXPERIMENTAL!.
 
 Supported:
 
@@ -12,6 +12,8 @@ Supported:
 
 * File data block decryption (currently no streaming interface)
 
+* File data block encryption (currently no streaming interface)
+
 Unsupported:
 
 * File name obfuscation
@@ -20,5 +22,4 @@ Unsupported:
 
 * File chunk encryption
 
-There is currently not nice interface with Read + Seek (TODO) and the code is a mess.
-
+There is currently no nice interface with Read + Seek.
